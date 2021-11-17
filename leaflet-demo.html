@@ -82,6 +82,7 @@
 	</div>
 </div>
 <script>
+	// require('mapbox.js');
 
 	var mymap = L.map('map').setView([51.505, -0.09], 13);
 
@@ -94,8 +95,14 @@
 		zoomOffset: -1
 	}).addTo(mymap);
 
-	L.marker([51.5, -0.09]).addTo(mymap)
-		.bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+	mymap.on('click', function(e){
+        alert(e.latlng);
+    }); 
+
+    L.marker([51.5, -0.09], {
+        draggable: true,
+    }).addTo(mymap)
+        .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
 
 	L.circle([51.508, -0.11], 500, {
 		color: 'red',
