@@ -1,4 +1,3 @@
-// require('mapbox.js');
 'use strict'
 
 let objectsJson;
