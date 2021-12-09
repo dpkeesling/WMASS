@@ -26,7 +26,7 @@ Congratulations, you have installed WMASS
 
 ## Usage
 
-* Type in the web address of your webserver into a browser. If you installed a websever locally, or by using the tutorial above, the web address will be http://localhost
+* Type in the web address of your webserver into a browser. If you installed a webserver locally, or by using the tutorial above, the web address will be http://localhost
 
 ![WMASS](./assets/WMASS_image.jpg)
 
