@@ -28,7 +28,7 @@ Congratulations, you have installed WMASS
 
 * Type in the web address of your webserver into a browser. If you installed a websever locally, or by using the tutorial above, the web address will be http://localhost
 
-![This is an image](./assets/WMASS_image.jpg)
+![WMASS](./assets/WMASS_image.jpg)
 
 * Click anywhere on the map to display the latitude and longitude of that location
 * Click on the circle and enter a number between 0 and 255 it to red. The higher the number, the more red it becomes
