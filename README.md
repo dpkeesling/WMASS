@@ -31,7 +31,7 @@ Congratulations, you have installed WMASS
 ![WMASS](./assets/WMASS_image.jpg)
 
 * Click anywhere on the map to display the latitude and longitude of that location
-* Click on the circle and enter a number between 0 and 255 it to red. The higher the number, the more red it becomes
+* Click on the circle and enter a number between 0 and 255 to change it to red. The higher the number, the more red it becomes
 * Click on the triangle to pull up a slider that will allow you to change the color of it to blue. Drag the slider to the right to make it more blue
 * Marker objects can be dragged around, Click on the marker to display it's properties.
 
