@@ -61,7 +61,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## Contributers
 Alex Fricke (https://github.com/aafricke), Alex Ross (https://github.com/alexleroyross), Dan Keesling (https://github.com/dpkeesling), Noah Schram (https://github.com/nsschram), and Stephen Vickery (https://github.com/sjvickery)
 
-Special thanks to Raphaël Payet-Burin (https://github.com/RaphaelPB), who is the creator of the WHAT-IF model. He worked with our team and help us understand how the model worked.
+Special thanks to Raphaël Payet-Burin (https://github.com/RaphaelPB), who is the creator of the WHAT-IF model. He worked with our team and helped us understand how the model worked.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
