@@ -4,7 +4,7 @@ A visualization tool for the WHAT-IF model
 
 WHAT-IF can be found here: https://github.com/RaphaelPB/WHAT-IF
 
-## Requirements:
+## Requirements
 - A functioning web server
 - Internet Connection
 - A web broswer
