@@ -2,7 +2,7 @@
 
 A visualization tool for the WHAT-IF model
 
-What if can be found here: https://github.com/RaphaelPB/WHAT-IF
+WHAT-IF can be found here: https://github.com/RaphaelPB/WHAT-IF
 
 ## Requirements:
 - A functioning web server
