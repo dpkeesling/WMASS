@@ -13,6 +13,76 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     zoomOffset: -1
 }).addTo(map);
 
+var LeafIcon = L.Icon.extend({
+    options: {
+         iconSize:     [38, 95]
+    }
+});
+
+var greenIcon = new LeafIcon({
+    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
+    });
+
+var drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+var drawControl = new L.Control.Draw({
+    position: 'topright',
+    draw: {
+        polygon: {
+            shapeOptions: {
+                color: 'purple'
+            },
+            allowIntersection: false,
+            drawError: {
+                color: 'orange',
+                timeout: 1000
+            },
+            showArea: true,
+            metric: false,
+            repeatMode: true
+        },
+        polyline: {
+            shapeOptions: {
+                color: 'red'
+            },
+        },
+polyline: {
+  shapeOptions: {
+    color: 'blue'
+  },
+},
+        rect: {
+            shapeOptions: {
+                color: 'green'
+            },
+        },
+        circle: {
+            shapeOptions: {
+                color: 'steelblue'
+            },
+        },
+        marker: {
+            icon: greenIcon
+        },
+    },
+    edit: {
+        featureGroup: drawnItems
+    }
+});
+map.addControl(drawControl);
+
+map.on('draw:created', function (e) {
+    var type = e.layerType,
+        layer = e.layer;
+
+    if (type === 'marker') {
+        layer.bindPopup('A popup!');
+    }
+
+    drawnItems.addLayer(layer);
+});
+
 // Create a circle that is colored based on the numerical value in its text box
 const circle = L.circle([51.508, -0.11], 500, {
     color: '#fff',

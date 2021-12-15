@@ -28,12 +28,31 @@ Congratulations, you have installed WMASS
 
 * Type in the web address of your webserver into a browser. If you installed a webserver locally, or by using the tutorial above, the web address will be http://localhost
 
-![WMASS](./assets/WMASS_image.jpg)
+![WMASS](./assets/WMASS_image.png)
 
 * Click anywhere on the map to display the latitude and longitude of that location
 * Click on the circle and enter a number between 0 and 255 to change it to red. The higher the number, the more red it becomes
 * Click on the triangle to pull up a slider that will allow you to change the color of it to blue. Drag the slider to the right to make it more blue
-* Marker objects can be dragged around, Click on the marker to display it's properties.
+* Marker objects can be dragged around, Click on the marker to display it's properties
+  
+## Toolbar
+* The toolbar has multiple options for putting geometric shapes onto your map
+* Draw Line
+  * The draw line tool lets you put lines onto your map where you can drop new nodes to adjust your line
+* Draw Polyline 
+  * The draw polyline tool lets you put polygons onto your map where you can click, hold, then drag to adjust the shape of your polyline
+* Draw Rectangle
+  * The draw rectangle tool lets you put rectangles onto your map where you can click, hold, then drag to adjust the shape of your rectangle
+* Draw Circle
+  * The draw circle tool lets you put circles onto your map where you can click, hold, then drag to adjust the shape of your circle
+* Marker Icon
+  * The marker icon tool lets you select the tool then click on the map where you want to drop the icon
+* Circle Marker
+  * The circle marker tool lets you select the tool then click on the map where you want to drop circle
+* Delete 
+  * The delete tool lets you either save your changes, cancel the delete, or delete all markers/lines that you have put onto the map
+
+
 
 ## Objects.json
 Users can create their own objects for WMASS within the objects.json file.
