@@ -23,6 +23,7 @@ var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
     });
 
+let csvDataStruct = {}
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -47,11 +48,6 @@ var drawControl = new L.Control.Draw({
                 color: 'red'
             },
         },
-polyline: {
-  shapeOptions: {
-    color: 'blue'
-  },
-},
         rect: {
             shapeOptions: {
                 color: 'green'
@@ -59,7 +55,9 @@ polyline: {
         },
         circle: {
             shapeOptions: {
-                color: 'steelblue'
+                color: '#fff',
+                fillColor: '#fff',
+                fillOpacity: 0.5
             },
         },
         marker: {
@@ -72,36 +70,6 @@ polyline: {
 });
 map.addControl(drawControl);
 
-map.on('draw:created', function (e) {
-    var type = e.layerType,
-        layer = e.layer;
-
-    if (type === 'marker') {
-        layer.bindPopup('A popup!');
-    }
-
-    drawnItems.addLayer(layer);
-});
-
-// Create a circle that is colored based on the numerical value in its text box
-const circle = L.circle([51.508, -0.11], 500, {
-    color: '#fff',
-    fillColor: '#fff',
-    fillOpacity: 0.5,
-    draggable: true
-}).addTo(map).bindPopup("<b>Hello world!</b><br /><input type=\"text\" id=\"testTextBox\" onkeyup=\"updateCircleColor(this.value)\">");
-
-// Create a polygon that is colored based on the value slider
-const polygon = L.polygon([
-    [51.509, -0.08],
-    [51.503, -0.06],
-    [51.51, -0.047]
-], {
-    color: '#fff',
-    fillColor: '#fff',
-    fillOpacity: 0.5
-}).addTo(map).bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"waterAlloc\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"testSlider\" oninput=\"updatePolygonState(this.value)\">");
-
 // Converts an individual color component to a hex value
 function componentToHex(c) {
     var hex = c.toString(16);
@@ -113,16 +81,47 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-// Changes the color of the circle
-function updateCircleColor(value) {
-    if(isNaN(value) || value < 0){
-        return
+let markerIteration = 0
+let circleIteration = 0
+map.on('draw:created', function (e) {
+    let layerId
+    var type = e.layerType,
+        layer = e.layer;
+
+    if (type === 'marker') {
+        layerId = "marker" + markerIteration
+        markerIteration += 1
+        layer.bindPopup('A popup!');
+    }
+    else if (type === 'circle') {
+        layerId = "circle" + circleIteration
+        circleIteration += 1
+        layer.bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"waterAlloc\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"" + layerId + "\" oninput=\"updatePolygonState(this.value)\">");
+        document.getElementById(layerId).oninput = function(e) {
+            let colorValue = Math.floor(e.value * 2.55)
+            let rg = 255 - colorValue
+            let newColor = rgbToHex(rg, rg, 255)
+            // ???
+            polygon.setStyle({color: newColor, fillColor: newColor});
+        
+            document.getElementById("waterAlloc").innerHTML = e.value;
+        }
     }
 
-    let gb = (value > 255 ? 0 : 255 - value)
-    let newColor = rgbToHex(255, gb, gb)
-    circle.setStyle({color: newColor, fillColor: newColor});
-}
+    drawnItems.addLayer(layer);
+    csvDataStruct.mapLayers[layerId] = { layer }
+});
+
+// Create a polygon that is colored based on the value slider
+const polygon = L.polygon([
+    [51.509, -0.08],
+    [51.503, -0.06],
+    [51.51, -0.047]
+], {
+    color: '#fff',
+    fillColor: '#fff',
+    fillOpacity: 0.5
+}).addTo(map).bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"waterAlloc\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"testSlider\" oninput=\"updatePolygonState(this.value)\">");
 
 // Update the polygon color and update the text that displays the numerical value in the slider
 function updatePolygonState(value) {
@@ -187,19 +186,6 @@ function onRightClick(e){
         hiddenElement.click();
     })
 }
-
-// Create a popup
-var popup = L.popup();
-
-// Display the popup with the coordinates of the user's mouse pointer when they click the map
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
-}
-
-map.on('click', onMapClick);
 
 let objectsJson;
 
