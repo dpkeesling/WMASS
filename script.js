@@ -96,15 +96,16 @@ map.on('draw:created', function (e) {
     else if (type === 'circle') {
         layerId = "circle" + circleIteration
         circleIteration += 1
-        layer.bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"waterAlloc\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"" + layerId + "\" oninput=\"updatePolygonState(this.value)\">");
+        let waterAllocId = layerId + "water"
+        layer.bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"" + waterAllocId + "\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"" + layerId + "\" oninput=\"updatePolygonState(this.value)\">");
         document.getElementById(layerId).oninput = function(e) {
             let colorValue = Math.floor(e.value * 2.55)
             let rg = 255 - colorValue
             let newColor = rgbToHex(rg, rg, 255)
-            // ???
-            polygon.setStyle({color: newColor, fillColor: newColor});
+            // todo: does this work?
+            layer.setStyle({color: newColor, fillColor: newColor});
         
-            document.getElementById("waterAlloc").innerHTML = e.value;
+            document.getElementById(waterAllocId).innerHTML = e.value;
         }
     }
 
