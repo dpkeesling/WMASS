@@ -6,4 +6,17 @@
         "popupAnchor": [0, -30],
         "powerProduction":"0.85 dollars/kwh"
     }
+    ,
+    "Reservoir":{
+        "imgPath":"./icons/hydroElectricPP.png",
+        "iconSize": [96, 96],
+        "iconAnchor": [48, 48],
+        "popupAnchor": [0, -30],
+        "resCatch": "Upstream",
+        "wStorCap": 35,
+        "wStoreIni": 20,
+        "WStorFin": 20,
+        "wkV": 0,
+        "wResArea": 0
+    }
 }

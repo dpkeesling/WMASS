@@ -219,6 +219,15 @@ $(document).ready(function(){
             popupAnchor:  objectsJson.HydroPowerPlant.popupAnchor // point from which the popup should open relative to the iconAnchor
         });
 
+        var reservoirIcon = L.icon({
+            iconUrl:      objectsJson.Reservoir.imgPath, 
+
+            iconSize:     objectsJson.Reservoir.iconSize,
+            iconAnchor:   objectsJson.Reservoir.iconAnchor, // point of the icon which will correspond to marker's location
+            popupAnchor:  objectsJson.Reservoir.popupAnchor // point from which the popup should open relative to the iconAnchor
+        });
+        
+
         // The marker that represents the power plant from the JSON data
         L.marker([51.5, -0.09], {
             draggable: true,
@@ -226,7 +235,36 @@ $(document).ready(function(){
         }).addTo(map)
             .bindPopup("I am a dam that produces " + objectsJson.HydroPowerPlant.powerProduction + " in electricity").openPopup();
 
+        // Marker that represents reservoir data from JSON
+        L.marker([51.5, -0.04], {
+            draggable: true,
+            icon: reservoirIcon
+        }).addTo(map)
+            .bindPopup("<b>Reservoir Info</b><br/>"+ objectsJson.Reservoir.resCatch + 
+            "<br /><input type=\"text\" value=\"\" id=\"reservoirInput\">" + "<br/><input type=\"button\" value=\"Submit\" id=\"submitInfo\">").openPopup();
+        
+
+        
+        // function setResType(value){
+        //     objectsJson.Reservoir.resCatch = value;
+        //     document.getElementById("reservoirInput").value =  objectsJson.Reservoir.resCatch;
+        //     window.alert(objectsJson.Reservoir.resCatch);
+        // }
+
     }).fail(function(){
         console.log("An error has occurred.");
     });
+
+    // function setResType(value){
+    //     objectsJson.Reservoir.resCatch = value;
+    //     document.getElementById("reservoirInput").value =  objectsJson.Reservoir.resCatch;
+    //     window.alert(objectsJson.Reservoir.resCatch);
+    // }
+
 });
+
+
+
+
+
+
