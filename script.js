@@ -23,7 +23,6 @@ var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
     });
 
-let csvDataStruct = {}
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -73,7 +72,7 @@ map.addControl(drawControl);
 // Converts an individual color component to a hex value
 function componentToHex(c) {
     var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+    return hex.length === 1 ? "0" + hex : hex;
 }
 
 // Coverts the given RGB values to hex
@@ -81,23 +80,46 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-let markerIteration = 0
-let circleIteration = 0
+let jsonMapData = {
+    marker: {
+
+    }, 
+    circle: {
+        hydroPowerPlants: []
+    }
+}
+
+class MapObject {
+    constructor(id, layer, popupHtml, customProperties){
+        this.id = id
+        this.layer = layer
+        this.popupHtml = popupHtml
+        this.customProperties = customProperties
+    }
+}
+
+function createHydroPowerPlant(layer) {
+    let hydroPowerPlantId = Object.keys(jsonMapData.circle.hydroPowerPlants).length
+    let waterAllocSpanId = "waterAllocSpan" + hydroPowerPlantId
+    let waterAllocSliderId = "waterAllocSlider" + hydroPowerPlantId
+    let popupHtml = "<b>Hydropower Plant</b><br />Water allocation: <span id=\"" + waterAllocSpanId + "\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"" + waterAllocSliderId + "\">"
+
+    let newObject = new MapObject(hydroPowerPlantId, layer, popupHtml, null)
+    jsonMapData.circle.hydroPowerPlants[hydroPowerPlantId] = newObject
+    return newObject
+}
+
 map.on('draw:created', function (e) {
-    let layerId
+    let newObject
     var type = e.layerType,
         layer = e.layer;
 
     if (type === 'marker') {
-        layerId = "marker" + markerIteration
-        markerIteration += 1
         layer.bindPopup('A popup!');
     }
     else if (type === 'circle') {
-        layerId = "circle" + circleIteration
-        circleIteration += 1
-        let waterAllocId = layerId + "water"
-        layer.bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"" + waterAllocId + "\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"" + layerId + "\" oninput=\"updatePolygonState(this.value)\">");
+        newObject = createHydroPowerPlant(layer)
+
         document.getElementById(layerId).oninput = function(e) {
             let colorValue = Math.floor(e.value * 2.55)
             let rg = 255 - colorValue
@@ -109,30 +131,11 @@ map.on('draw:created', function (e) {
         }
     }
 
-    drawnItems.addLayer(layer);
-    csvDataStruct.mapLayers[layerId] = { layer }
+    // todo: have this event handler interface with a JSON version of the map, and have something that updates the map based on the JSON
+    // drawnItems.addLayer(layer);
+    // drawnItems.add()
+    layer.addTo(map).bindPopup(newObject.popupHtml)
 });
-
-// Create a polygon that is colored based on the value slider
-const polygon = L.polygon([
-    [51.509, -0.08],
-    [51.503, -0.06],
-    [51.51, -0.047]
-], {
-    color: '#fff',
-    fillColor: '#fff',
-    fillOpacity: 0.5
-}).addTo(map).bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"waterAlloc\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"testSlider\" oninput=\"updatePolygonState(this.value)\">");
-
-// Update the polygon color and update the text that displays the numerical value in the slider
-function updatePolygonState(value) {
-    let colorValue = Math.floor(value * 2.55)
-    let rg = 255 - colorValue
-    let newColor = rgbToHex(rg, rg, 255)
-    polygon.setStyle({color: newColor, fillColor: newColor});
-
-    document.getElementById("waterAlloc").innerHTML = value;
-}
 
 // When the user right-clicks, convert data on the map to a CSV file and download it
 function onRightClick(e){
