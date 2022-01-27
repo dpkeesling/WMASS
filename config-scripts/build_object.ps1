@@ -17,9 +17,9 @@ function get-objectname () {
 }
 
 function test-userinput($userinput) {
-    $inputlength = $userinput | measure-object -character | select -expandproperty characters
+    $inputlength = $userinput | measure-object -character | Select-Object -expandproperty characters
     if ($inputlength -lt 256) {
-        $answer = Read-Host "You have entered: ${input}. Is this correct? (Y/N)"
+        $answer = Read-Host "You have entered: ${userinput}. Is this correct? (Y/N)"
         if (($answer -eq 'Y') -or ($answer -eq 'y')) {
             return $true
         }
