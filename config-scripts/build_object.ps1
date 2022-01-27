@@ -9,16 +9,15 @@ function get-objectname () {
     $loopvalue = $true
     while ($loopvalue) {
         $objectname = Read-Host "Enter the name of the new map object. Must be less than 256 characters"
-        write-output $objectname
-        $inputcheck = check-userinput "${objectname}"
+        $inputcheck = test-userinput($objectname)
         if ($inputcheck) {
             $loopvalue = $false
         }
     }
 }
 
-function check-userinput($input) {
-    $inputlength = $input | measure-object -character | select -expandproperty characters
+function test-userinput($userinput) {
+    $inputlength = $userinput | measure-object -character | select -expandproperty characters
     if ($inputlength -lt 256) {
         $answer = Read-Host "You have entered: ${input}. Is this correct? (Y/N)"
         if (($answer -eq 'Y') -or ($answer -eq 'y')) {
