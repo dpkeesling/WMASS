@@ -102,15 +102,46 @@ function createHydroPowerPlant(layer) {
     let hydroPowerPlantId = Object.keys(jsonMapData.circle.hydroPowerPlants).length
     let waterAllocSpanId = "waterAllocSpan" + hydroPowerPlantId
     let waterAllocSliderId = "waterAllocSlider" + hydroPowerPlantId
-    let popupHtml = "<b>Hydropower Plant</b><br />Water allocation: <span id=\"" + waterAllocSpanId + "\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"" + waterAllocSliderId + "\">"
+    let contentDivId = "contentDiv" + hydroPowerPlantId
 
-    let newObject = new MapObject(hydroPowerPlantId, layer, popupHtml, null)
+    let popupHtml = document.createElement("div")
+    popupHtml.id = contentDivId
+
+    let popupText = document.createElement("p")
+    popupText.innerHTML = "Water allocation:<br />"
+    popupHtml.appendChild(popupText)
+
+    let waterAllocSpan = document.createElement("span")
+    waterAllocSpan.id = waterAllocSpanId
+    waterAllocSpan.innerHTML = "0"
+    popupHtml.appendChild(waterAllocSpan)
+
+    let waterAllocSlider = document.createElement("input")
+    waterAllocSlider.type = "range"
+    waterAllocSlider.min = "0"
+    waterAllocSlider.max = "100"
+    waterAllocSlider.value = "0"
+    waterAllocSlider.id = waterAllocSliderId
+    waterAllocSlider.oninput = function(e) {
+        let colorValue = Math.floor(e.value * 2.55)
+        let rg = 255 - colorValue
+        let newColor = rgbToHex(rg, rg, 255)
+        // todo: does this work?
+        e.layer.setStyle({color: newColor, fillColor: newColor});
+    
+        document.getElementById(waterAllocSpanId).innerHTML = e.value;
+    }
+    popupHtml.appendChild(waterAllocSlider)
+
+    let newObject = new MapObject(hydroPowerPlantId, layer, popupHtml.textContent, null)
     jsonMapData.circle.hydroPowerPlants[hydroPowerPlantId] = newObject
+
+    layer.addTo(map).bindPopup(popupHtml)
+
     return newObject
 }
 
 map.on('draw:created', function (e) {
-    let newObject
     var type = e.layerType,
         layer = e.layer;
 
@@ -118,23 +149,11 @@ map.on('draw:created', function (e) {
         layer.bindPopup('A popup!');
     }
     else if (type === 'circle') {
-        newObject = createHydroPowerPlant(layer)
-
-        document.getElementById(layerId).oninput = function(e) {
-            let colorValue = Math.floor(e.value * 2.55)
-            let rg = 255 - colorValue
-            let newColor = rgbToHex(rg, rg, 255)
-            // todo: does this work?
-            layer.setStyle({color: newColor, fillColor: newColor});
-        
-            document.getElementById(waterAllocId).innerHTML = e.value;
-        }
+        createHydroPowerPlant(layer)
     }
 
     // todo: have this event handler interface with a JSON version of the map, and have something that updates the map based on the JSON
-    // drawnItems.addLayer(layer);
-    // drawnItems.add()
-    layer.addTo(map).bindPopup(newObject.popupHtml)
+    drawnItems.addLayer(layer);
 });
 
 // When the user right-clicks, convert data on the map to a CSV file and download it
