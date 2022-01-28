@@ -90,9 +90,8 @@ let jsonMapData = {
 }
 
 class MapObject {
-    constructor(id, layer, popupHtml, customProperties){
+    constructor(id, popupHtml, customProperties){
         this.id = id
-        this.layer = layer
         this.popupHtml = popupHtml
         this.customProperties = customProperties
     }
@@ -129,13 +128,12 @@ function createHydroPowerPlant(layer) {
         let newColor = rgbToHex(rg, rg, 255)
         layer.setStyle({color: newColor, fillColor: newColor});
     
-        console.log(waterAllocSlider.value)
         document.getElementById(waterAllocSpanId).innerHTML = waterAllocSlider.value;
     }
     popupHtml.appendChild(waterAllocSlider)
 
-    let newObject = new MapObject(hydroPowerPlantId, layer, popupHtml.textContent, null)
-    jsonMapData.circle.hydroPowerPlants[hydroPowerPlantId] = newObject
+    let newObject = new MapObject(hydroPowerPlantId, popupHtml.textContent, null)
+    jsonMapData.circle.hydroPowerPlants[hydroPowerPlantId] = JSON.stringify(newObject)
 
     layer.addTo(map).bindPopup(popupHtml)
 
