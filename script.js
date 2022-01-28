@@ -107,14 +107,15 @@ function createHydroPowerPlant(layer) {
     let popupHtml = document.createElement("div")
     popupHtml.id = contentDivId
 
-    let popupText = document.createElement("p")
-    popupText.innerHTML = "Water allocation:<br />"
+    let popupText = document.createElement("b")
+    popupText.innerHTML = "Water allocation:  "
     popupHtml.appendChild(popupText)
 
     let waterAllocSpan = document.createElement("span")
     waterAllocSpan.id = waterAllocSpanId
     waterAllocSpan.innerHTML = "0"
     popupHtml.appendChild(waterAllocSpan)
+    popupHtml.appendChild(document.createElement("br"))
 
     let waterAllocSlider = document.createElement("input")
     waterAllocSlider.type = "range"
@@ -123,13 +124,13 @@ function createHydroPowerPlant(layer) {
     waterAllocSlider.value = "0"
     waterAllocSlider.id = waterAllocSliderId
     waterAllocSlider.oninput = function(e) {
-        let colorValue = Math.floor(e.value * 2.55)
+        let colorValue = Math.floor(waterAllocSlider.value * 2.55)
         let rg = 255 - colorValue
         let newColor = rgbToHex(rg, rg, 255)
-        // todo: does this work?
-        e.layer.setStyle({color: newColor, fillColor: newColor});
+        layer.setStyle({color: newColor, fillColor: newColor});
     
-        document.getElementById(waterAllocSpanId).innerHTML = e.value;
+        console.log(waterAllocSlider.value)
+        document.getElementById(waterAllocSpanId).innerHTML = waterAllocSlider.value;
     }
     popupHtml.appendChild(waterAllocSlider)
 
