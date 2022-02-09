@@ -1,17 +1,25 @@
 # Powershell script
 
 function main {
-    get-objectname
+    $objectname = get-userinput("name of the new map object")
+    $imgpath = get-userinput("file path to the icon's image file")
+    $iconsize = ""
+    while($true) {
+        $iconsize = get-userinput("the icon's length and width in pixels, formatted in ##,## format")
+        if($iconsize -match '^\d+,\d+$') {
+            break
+        }
+        Write-Output "Invalid format."
+    } 
 
 }
 
-function get-objectname () {
-    $loopvalue = $true
-    while ($loopvalue) {
-        $objectname = Read-Host "Enter the name of the new map object. Must be less than 256 characters"
+function get-userinput ($promptstring) {
+    while ($true) {
+        $objectname = Read-Host "Enter the ${promptstring}. Must be less than 256 characters"
         $inputcheck = test-userinput($objectname)
         if ($inputcheck) {
-            $loopvalue = $false
+            return $objectname
         }
     }
 }
@@ -31,6 +39,7 @@ function test-userinput($userinput) {
         write-output "The string is ${inputlength} characters, which is too long"
     }
 }
+
 
 function write-tojson () {
     $jsonfile = '../objects.json'
