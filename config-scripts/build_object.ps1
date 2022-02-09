@@ -12,6 +12,14 @@ function main {
         Write-Output "Invalid format."
     } 
 
+    $iconanchor = ""
+    while($true) {
+        $iconanchor = get-userinput("the coordinates of the icon's anchor point, formatted in ##,## format")
+        if($iconanchor -match '^\d+,\d+$') {
+            break
+        }
+        Write-Output "Invalid format."
+    }
 }
 
 function get-userinput ($promptstring) {
