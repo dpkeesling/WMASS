@@ -226,6 +226,14 @@ $(document).ready(function(){
             iconAnchor:   objectsJson.Reservoir.iconAnchor, // point of the icon which will correspond to marker's location
             popupAnchor:  objectsJson.Reservoir.popupAnchor // point from which the popup should open relative to the iconAnchor
         });
+
+        var runoffIcon = L.icon({
+            iconUrl:      objectsJson.Reservoir.imgPath, 
+
+            iconSize:     objectsJson.Reservoir.iconSize,
+            iconAnchor:   objectsJson.Reservoir.iconAnchor, // point of the icon which will correspond to marker's location
+            popupAnchor:  objectsJson.Reservoir.popupAnchor // point from which the popup should open relative to the iconAnchor
+        });
         
 
         // The marker that represents the power plant from the JSON data
@@ -243,6 +251,11 @@ $(document).ready(function(){
             .bindPopup("<b>Reservoir Info</b><br/>"+ objectsJson.Reservoir.resCatch + 
             "<br /><input type=\"text\" value=\"\" id=\"reservoirInput\">" + "<br/><input type=\"button\" value=\"Submit\" id=\"submitInfo\">").openPopup();
         
+        L.marker([51.5, -0.09], {
+            draggable: true,
+            icon: runoffIcon
+        }).addTo(map)
+            .bindPopup("I am a runoff that produces " + objectsJson.RunOff.powerProduction + " in electricity").openPopup();
 
         
         // function setResType(value){
