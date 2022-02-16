@@ -99,6 +99,8 @@ class MapObject {
     }
 }
 
+L.shapefile("Shapefiles/Countries_WGS84.shp")
+
 /**
  * Creates a hydro power plant (circle) with relevant HTML for the popup.
  * Adds the MapObject to the map's JSON blob
