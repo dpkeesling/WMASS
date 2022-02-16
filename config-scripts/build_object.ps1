@@ -1,25 +1,41 @@
 # Powershell script
 
 function main {
-    $objectname = get-userinput("name of the new map object")
-    $imgpath = get-userinput("file path to the icon's image file")
-    $iconsize = ""
+    $object = New-Object -TypeName psobject
+    $temp = get-userinput('name of the new map object')
+    $object | Add-Member -MemberType NoteProperty -Name text -Value "${temp}"
+    $temp = get-userinput('file path to the icon image file')
+    $object | Add-Member -MemberType NoteProperty -Name imgpath -Value "${temp}"
+    $object | Add-Member -MemberType NoteProperty -Name iconsize -Value ''
     while($true) {
-        $iconsize = get-userinput("the icon's length and width in pixels, formatted in ##,## format")
+        $object.iconsize = get-userinput("the icon's length and width in pixels, formatted in ##,## format")
         if($iconsize -match '^\d+,\d+$') {
             break
         }
         Write-Output "Invalid format."
-    } 
+    }
 
-    $iconanchor = ""
+    $object | Add-Member -MemberType NoteProperty -Name iconanchor -Value ''
     while($true) {
-        $iconanchor = get-userinput("the coordinates of the icon's anchor point, formatted in ##,## format")
-        if($iconanchor -match '^\d+,\d+$') {
+        $object.iconanchor = get-userinput("the coordinates of the icon's anchor point, formatted in ##,## format")
+        if($object.iconanchor -match '^-?\d+,-?\d+$') {
             break
         }
         Write-Output "Invalid format."
     }
+
+    $object | Add-Member -MemberType NoteProperty -Name popupanchor -Value ''
+    while($true) {
+        $object.popupanchor = get-userinput("the coordinates of the popup's anchor point, formatted in ##,## format")
+        if($object.popupanchor -match '^-?\d+,-?\d+$') {
+            break
+        }
+        Write-Output "Invalid format."
+    }
+
+    Write-Output "${get-additionalproperties}"
+
+
 }
 
 function get-userinput ($promptstring) {
@@ -36,16 +52,30 @@ function test-userinput($userinput) {
     $inputlength = $userinput | measure-object -character | Select-Object -expandproperty characters
     if ($inputlength -lt 256) {
         $answer = Read-Host "You have entered: ${userinput}. Is this correct? (Y/N)"
-        if (($answer -eq 'Y') -or ($answer -eq 'y')) {
-            return $true
-        }
-        else {
-            return $false
-        }
+        return ($answer -eq 'Y') -or ($answer -eq 'y')
     }
     else {
         write-output "The string is ${inputlength} characters, which is too long"
     }
+}
+
+function get-additionalproperties {
+    $additionproperties = @()
+    while($true) {
+        $object = New-Object -TypeName psobject
+        $object | Add-Member -MemberType NoteProperty -Name propertyname -Value Read-Host "Enter the name of an additional property you would like to add. If you have no more properties, type 'exit'"
+        if ($object.propertyname -eq 'exit') {
+            break
+        }
+        if (test-userinput($object.propertyname)) {
+            $object | Add-Member -MemberType NoteProperty -Name propertyvalue -Value Read-Host "Enter the initial value for this property"
+            if (test-userinput($object.propertyname)) {
+                $additionproperties += $object
+            }
+        }
+        return $additionproperties
+    }
+    
 }
 
 
