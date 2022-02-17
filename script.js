@@ -23,6 +23,9 @@ var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
     });
 
+// Adds all shapefiles in countries.zip to the map
+L.shapefile("http://localhost:8000/countries.zip").addTo(map);
+
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -98,8 +101,6 @@ class MapObject {
         this.customProperties = customProperties
     }
 }
-
-L.shapefile("http://localhost:8000/countries.zip").addTo(map);
 
 /**
  * Creates a hydro power plant (circle) with relevant HTML for the popup.
