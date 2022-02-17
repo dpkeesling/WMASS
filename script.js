@@ -99,7 +99,7 @@ class MapObject {
     }
 }
 
-L.shapefile("Shapefiles/Countries_WGS84.shp")
+L.shapefile("http://localhost:8000/countries.zip").addTo(map);
 
 /**
  * Creates a hydro power plant (circle) with relevant HTML for the popup.
