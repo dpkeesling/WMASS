@@ -24,7 +24,7 @@ var greenIcon = new LeafIcon({
     });
 
 // Adds all shapefiles in countries.zip to the map
-L.shapefile("http://localhost:8000/countries.zip").addTo(map);
+L.shapefile("http://localhost/shapefiles/countries.zip").addTo(map);
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
