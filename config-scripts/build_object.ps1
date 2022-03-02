@@ -9,7 +9,7 @@ function main {
     $object | Add-Member -MemberType NoteProperty -Name iconsize -Value ''
     while($true) {
         $object.iconsize = get-userinput("the icon's length and width in pixels, formatted in ##,## format")
-        if($iconsize -match '^\d+,\d+$') {
+        if($object.iconsize -match '^\d+,\d+$') {
             break
         }
         Write-Output "Invalid format."
@@ -33,8 +33,12 @@ function main {
         Write-Output "Invalid format."
     }
 
-    Write-Output "${get-additionalproperties}"
+    $arr = get-additionalproperties
+    foreach ($additionprop in $arr) {
+        $object | Add-Member -MemberType NoteProperty -Name $additionprop.propertyname -Value $additionprop.propertyvalue
+    }
 
+    write-tojson($object)
 
 }
 
@@ -63,31 +67,43 @@ function get-additionalproperties {
     $additionproperties = @()
     while($true) {
         $object = New-Object -TypeName psobject
-        $object | Add-Member -MemberType NoteProperty -Name propertyname -Value Read-Host "Enter the name of an additional property you would like to add. If you have no more properties, type 'exit'"
+        $temp = Read-Host "Enter the name of an additional property you would like to add. If you have no more properties, type 'exit'"
+        $object | Add-Member -MemberType NoteProperty -Name propertyname -Value $temp
         if ($object.propertyname -eq 'exit') {
             break
         }
         if (test-userinput($object.propertyname)) {
-            $object | Add-Member -MemberType NoteProperty -Name propertyvalue -Value Read-Host "Enter the initial value for this property"
-            if (test-userinput($object.propertyname)) {
+            $temp = Read-Host "Enter the initial value for this property"
+            $object | Add-Member -MemberType NoteProperty -Name propertyvalue -Value $temp
+            if (test-userinput($object.propertyvalue)) {
                 $additionproperties += $object
             }
         }
-        return $additionproperties
     }
-    
+    return $additionproperties    
 }
 
 
-function write-tojson () {
-    $jsonfile = '../objects.json'
+function write-tojson ($object) {
+    Write-Output $object
+    # $jsonfile = Get-Content "..\objects.json"
+    # $jsonfile[0..($jsonfile.length-2)] | Out-File "..\objects.json" -Force
+    $outputstring = ",`n`t`"$($object.text)`":{`n`t`t`"imgPath`": `"$($object.imgpath)`",`n`t`t`"iconSize`": [$($object.iconsize)],`n`t`t`"iconAnchor`": [$($object.iconanchor)],`n`t`t`"popupAnchor`": [$($object.popupanchor)]"
+    $counter = 0
+    foreach($object_properties in $object.PsObject.Properties)
+    {
+        if($counter -le 4) {
+            continue
+        }
+        # Access the name of the property
+        $outputstring += ",`n`t`t`"$($object_properties.Name)`":`"$($object_properties.Value)`""
+        # TODO: Need to check if this property is the end of the object. If so, don't add a comma and close off
+        # Object with a }
+        
+        $counter += 1
+    }
+#     Add-Content -Path ..\objects.json -Value 
 
-    $json = Get-Content $jsonfile | Out-String | ConvertFrom-Json
-
-    $json | Add-Member -Type NoteProperty -Name 'newKey1' -Value 'newValue1'
-    $json | Add-Member -Type NoteProperty -Name 'newKey2' -Value 'newValue2'
-
-    $json | ConvertTo-Json | Set-Content $jsonfile
 }
 
 main
