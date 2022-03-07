@@ -23,6 +23,9 @@ var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
     });
 
+// Adds all shapefiles in countries.zip to the map
+L.shapefile("http://localhost/shapefiles/countries.zip").addTo(map);
+
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -47,11 +50,6 @@ var drawControl = new L.Control.Draw({
                 color: 'red'
             },
         },
-polyline: {
-  shapeOptions: {
-    color: 'blue'
-  },
-},
         rect: {
             shapeOptions: {
                 color: 'green'
@@ -59,7 +57,9 @@ polyline: {
         },
         circle: {
             shapeOptions: {
-                color: 'steelblue'
+                color: '#fff',
+                fillColor: '#fff',
+                fillOpacity: 0.5
             },
         },
         marker: {
@@ -72,40 +72,10 @@ polyline: {
 });
 map.addControl(drawControl);
 
-map.on('draw:created', function (e) {
-    var type = e.layerType,
-        layer = e.layer;
-
-    if (type === 'marker') {
-        layer.bindPopup('A popup!');
-    }
-
-    drawnItems.addLayer(layer);
-});
-
-// Create a circle that is colored based on the numerical value in its text box
-const circle = L.circle([51.508, -0.11], 500, {
-    color: '#fff',
-    fillColor: '#fff',
-    fillOpacity: 0.5,
-    draggable: true
-}).addTo(map).bindPopup("<b>Hello world!</b><br /><input type=\"text\" id=\"testTextBox\" onkeyup=\"updateCircleColor(this.value)\">");
-
-// Create a polygon that is colored based on the value slider
-const polygon = L.polygon([
-    [51.509, -0.08],
-    [51.503, -0.06],
-    [51.51, -0.047]
-], {
-    color: '#fff',
-    fillColor: '#fff',
-    fillOpacity: 0.5
-}).addTo(map).bindPopup("<b>Hydropower Plant</b><br />Water allocation: <span id=\"waterAlloc\">0</span><br /><input type=\"range\" min=\"0\" max=\"100\" value=\"0\" id=\"testSlider\" oninput=\"updatePolygonState(this.value)\">");
-
 // Converts an individual color component to a hex value
 function componentToHex(c) {
     var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+    return hex.length === 1 ? "0" + hex : hex;
 }
 
 // Coverts the given RGB values to hex
@@ -113,26 +83,88 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
-// Changes the color of the circle
-function updateCircleColor(value) {
-    if(isNaN(value) || value < 0){
-        return
+// Real-time JSON blob of map data
+let jsonMapData = {
+    marker: {
+
+    }, 
+    circle: {
+        hydroPowerPlants: []
+    }
+}
+
+// Basic class for any map object
+class MapObject {
+    constructor(id, popupHtml, customProperties){
+        this.id = id
+        this.popupHtml = popupHtml
+        this.customProperties = customProperties
+    }
+}
+
+/**
+ * Creates a hydro power plant (circle) with relevant HTML for the popup.
+ * Adds the MapObject to the map's JSON blob
+ * @param {Layer} layer Leaflet Map Layer to add the object to
+ * @returns the new MapObject
+ */
+function createHydroPowerPlant(layer) {
+    let hydroPowerPlantId = Object.keys(jsonMapData.circle.hydroPowerPlants).length
+    let waterAllocSpanId = "waterAllocSpan" + hydroPowerPlantId
+    let waterAllocSliderId = "waterAllocSlider" + hydroPowerPlantId
+    let contentDivId = "contentDiv" + hydroPowerPlantId
+
+    let popupHtml = document.createElement("div")
+    popupHtml.id = contentDivId
+
+    let popupText = document.createElement("b")
+    popupText.innerHTML = "Water allocation:  "
+    popupHtml.appendChild(popupText)
+
+    let waterAllocSpan = document.createElement("span")
+    waterAllocSpan.id = waterAllocSpanId
+    waterAllocSpan.innerHTML = "0"
+    popupHtml.appendChild(waterAllocSpan)
+    popupHtml.appendChild(document.createElement("br"))
+
+    let waterAllocSlider = document.createElement("input")
+    waterAllocSlider.type = "range"
+    waterAllocSlider.min = "0"
+    waterAllocSlider.max = "100"
+    waterAllocSlider.value = "0"
+    waterAllocSlider.id = waterAllocSliderId
+    waterAllocSlider.oninput = function(e) {
+        let colorValue = Math.floor(waterAllocSlider.value * 2.55)
+        let rg = 255 - colorValue
+        let newColor = rgbToHex(rg, rg, 255)
+        layer.setStyle({color: newColor, fillColor: newColor});
+    
+        document.getElementById(waterAllocSpanId).innerHTML = waterAllocSlider.value;
+    }
+    popupHtml.appendChild(waterAllocSlider)
+
+    let newObject = new MapObject(hydroPowerPlantId, popupHtml.textContent, null)
+    jsonMapData.circle.hydroPowerPlants[hydroPowerPlantId] = JSON.stringify(newObject)
+
+    layer.addTo(map).bindPopup(popupHtml)
+
+    return newObject
+}
+
+map.on('draw:created', function (e) {
+    var type = e.layerType,
+        layer = e.layer;
+
+    if (type === 'marker') {
+        layer.bindPopup('A popup!');
+    }
+    else if (type === 'circle') {
+        createHydroPowerPlant(layer)
     }
 
-    let gb = (value > 255 ? 0 : 255 - value)
-    let newColor = rgbToHex(255, gb, gb)
-    circle.setStyle({color: newColor, fillColor: newColor});
-}
-
-// Update the polygon color and update the text that displays the numerical value in the slider
-function updatePolygonState(value) {
-    let colorValue = Math.floor(value * 2.55)
-    let rg = 255 - colorValue
-    let newColor = rgbToHex(rg, rg, 255)
-    polygon.setStyle({color: newColor, fillColor: newColor});
-
-    document.getElementById("waterAlloc").innerHTML = value;
-}
+    // Add the new map layer to our collection of drawn items
+    drawnItems.addLayer(layer);
+});
 
 // When the user right-clicks, convert data on the map to a CSV file and download it
 function onRightClick(e){
@@ -187,19 +219,6 @@ function onRightClick(e){
         hiddenElement.click();
     })
 }
-
-// Create a popup
-var popup = L.popup();
-
-// Display the popup with the coordinates of the user's mouse pointer when they click the map
-function onMapClick(e) {
-    popup
-        .setLatLng(e.latlng)
-        .setContent("You clicked the map at " + e.latlng.toString())
-        .openOn(map);
-}
-
-map.on('click', onMapClick);
 
 let objectsJson;
 
