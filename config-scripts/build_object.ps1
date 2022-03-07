@@ -85,24 +85,23 @@ function get-additionalproperties {
 
 
 function write-tojson ($object) {
-    Write-Output $object
-    # $jsonfile = Get-Content "..\objects.json"
-    # $jsonfile[0..($jsonfile.length-2)] | Out-File "..\objects.json" -Force
-    $outputstring = ",`n`t`"$($object.text)`":{`n`t`t`"imgPath`": `"$($object.imgpath)`",`n`t`t`"iconSize`": [$($object.iconsize)],`n`t`t`"iconAnchor`": [$($object.iconanchor)],`n`t`t`"popupAnchor`": [$($object.popupanchor)]"
+    $jsonfile = Get-Content "..\objects.json"
+    $jsonfile[0..($jsonfile.length-3)] | Out-File "..\objects.json" -Force
+    $outputstring = "`n},`n`t`"$($object.text)`":{`n`t`t`"imgPath`": `"$($object.imgpath)`",`n`t`t`"iconSize`": [$($object.iconsize)],`n`t`t`"iconAnchor`": [$($object.iconanchor)],`n`t`t`"popupAnchor`": [$($object.popupanchor)]"
     $counter = 0
     foreach($object_properties in $object.PsObject.Properties)
     {
         if($counter -le 4) {
+            $counter += 1
             continue
         }
         # Access the name of the property
         $outputstring += ",`n`t`t`"$($object_properties.Name)`":`"$($object_properties.Value)`""
         # TODO: Need to check if this property is the end of the object. If so, don't add a comma and close off
-        # Object with a }
-        
-        $counter += 1
+        # Object with a }        
     }
-#     Add-Content -Path ..\objects.json -Value 
+    $outputstring += "`n`t}`n}"
+    Add-Content -Path ..\objects.json -Value $outputstring
 
 }
 
