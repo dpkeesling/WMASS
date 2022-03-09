@@ -2,7 +2,8 @@
 
 // Create the map object
 var map = L.map('map').setView([51.505, -0.09], 13);
-        
+var markers = new Array();
+var marker;        
 // Create a tile layer for the map images
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
@@ -154,7 +155,31 @@ map.on('draw:created', function (e) {
     // todo: have this event handler interface with a JSON version of the map, and have something that updates the map based on the JSON
     drawnItems.addLayer(layer);
 });
-
+map.on('click', function(e) {
+    marker = new L.Marker(e.latlng, {draggable:true});
+    map.addLayer(marker);
+    markers.push(marker);
+    var longMarker = markers.length;
+    var test = new Array();
+  
+    // create a red polyline from an array of LatLng points
+    if (markers.length > 1 ){
+        for(let i = 0; i < markers.length; i++) { 
+            test.push(markers[i].getLatLng());
+        }
+        var polyline = L.polyline(test, {color: 'red', clickable: 'true'}).addTo(map);
+    }
+    marker.on('dragend', function(e) {
+        if (markers.length > 1 ){
+            for(let i = 0; i < markers.length; i++) { 
+                test.push(markers[i].getLatLng());
+            }
+            var polyline = L.polyline(test, {color: 'red', clickable: 'true'}).addTo(map);
+        }
+      // Redraw polyline!
+      polyline.redraw();
+    })
+});
 // When the user right-clicks, convert data on the map to a CSV file and download it
 function onRightClick(e){
 
