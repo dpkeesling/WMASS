@@ -1,4 +1,3 @@
-# Powershell script
 
 function main {
     $object = New-Object -TypeName psobject
@@ -95,10 +94,7 @@ function write-tojson ($object) {
             $counter += 1
             continue
         }
-        # Access the name of the property
-        $outputstring += ",`n`t`t`"$($object_properties.Name)`":`"$($object_properties.Value)`""
-        # TODO: Need to check if this property is the end of the object. If so, don't add a comma and close off
-        # Object with a }        
+        $outputstring += ",`n`t`t`"$($object_properties.Name)`":`"$($object_properties.Value)`""     
     }
     $outputstring += "`n`t}`n}"
     Add-Content -Path ..\objects.json -Value $outputstring
