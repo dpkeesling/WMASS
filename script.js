@@ -24,6 +24,9 @@ var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
     });
 
+// Adds all shapefiles in countries.zip to the map
+L.shapefile("http://localhost/shapefiles/countries.zip").addTo(map);
+
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
@@ -81,6 +84,7 @@ function rgbToHex(r, g, b) {
     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
+// Real-time JSON blob of map data
 let jsonMapData = {
     marker: {
 
@@ -90,6 +94,7 @@ let jsonMapData = {
     }
 }
 
+// Basic class for any map object
 class MapObject {
     constructor(id, popupHtml, customProperties){
         this.id = id
@@ -98,6 +103,12 @@ class MapObject {
     }
 }
 
+/**
+ * Creates a hydro power plant (circle) with relevant HTML for the popup.
+ * Adds the MapObject to the map's JSON blob
+ * @param {Layer} layer Leaflet Map Layer to add the object to
+ * @returns the new MapObject
+ */
 function createHydroPowerPlant(layer) {
     let hydroPowerPlantId = Object.keys(jsonMapData.circle.hydroPowerPlants).length
     let waterAllocSpanId = "waterAllocSpan" + hydroPowerPlantId
@@ -152,7 +163,7 @@ map.on('draw:created', function (e) {
         createHydroPowerPlant(layer)
     }
 
-    // todo: have this event handler interface with a JSON version of the map, and have something that updates the map based on the JSON
+    // Add the new map layer to our collection of drawn items
     drawnItems.addLayer(layer);
 });
 map.on('click', function(e) {
