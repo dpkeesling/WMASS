@@ -3,7 +3,8 @@
 // Create the map object
 var map = L.map('map').setView([51.505, -0.09], 13);
 var markers = new Array();
-var marker;        
+var polylines = new Array();
+var marker;
 // Create a tile layer for the map images
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
@@ -11,7 +12,8 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
         'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     id: 'mapbox/streets-v11',
     tileSize: 512,
-    zoomOffset: -1
+    zoomOffset: -1,
+    
 }).addTo(map);
 
 var LeafIcon = L.Icon.extend({
@@ -167,7 +169,15 @@ map.on('draw:created', function (e) {
     drawnItems.addLayer(layer);
 });
 map.on('click', function(e) {
-    marker = new L.Marker(e.latlng, {draggable:true});
+    marker = new L.Marker(e.latlng, {
+        contextmenu:true,
+        contextmenuItems:[{
+            text: "remove marker",
+            callback: function(){
+                pullmarker();
+            }
+        }]
+    });
     map.addLayer(marker);
     markers.push(marker);
     var longMarker = markers.length;
@@ -179,18 +189,23 @@ map.on('click', function(e) {
             test.push(markers[i].getLatLng());
         }
         var polyline = L.polyline(test, {color: 'red', clickable: 'true'}).addTo(map);
+        polylines.push(polyline);
     }
-    marker.on('dragend', function(e) {
-        if (markers.length > 1 ){
-            for(let i = 0; i < markers.length; i++) { 
-                test.push(markers[i].getLatLng());
-            }
-            var polyline = L.polyline(test, {color: 'red', clickable: 'true'}).addTo(map);
-        }
-      // Redraw polyline!
-      polyline.redraw();
-    })
 });
+map.on('contextmenu',(e) => {
+    L.popup()
+    .setLatLng(e.latlng)
+    .setContent('<button onclick="pullmarker()">Remove last marker</button>')
+    .addTo(map)
+    .openOn(map);
+  });
+function pullmarker(){
+    let m = markers.pop();
+    map.removeLayer(m);
+    let p = polylines.pop();
+    map.removeLayer(p);
+}
+
 // When the user right-clicks, convert data on the map to a CSV file and download it
 function onRightClick(e){
 
