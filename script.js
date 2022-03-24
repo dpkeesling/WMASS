@@ -24,7 +24,19 @@ var greenIcon = new LeafIcon({
     });
 
 // Adds all shapefiles in countries.zip to the map
-L.shapefile("http://localhost/shapefiles/countries.zip").addTo(map);
+let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
+shapefile.addTo(map)
+
+shapefile.on('click', function(e){
+    let ids = []
+    shapefile.getLayers().forEach(layer => {
+        ids.push(JSON.stringify(layer.feature.properties))
+    });
+    shapefile.bindPopup(ids.toString())
+    shapefile.openPopup()
+})
+
+shapefile.bindPopup(L.popup().setContent())
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
