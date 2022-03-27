@@ -2,9 +2,7 @@
 
 // Create the map object
 var map = L.map('map').setView([51.505, -0.09], 13);
-var markers = new Array();
-var polylines = new Array();
-var marker;
+        
 // Create a tile layer for the map images
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
@@ -12,8 +10,7 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
         'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     id: 'mapbox/streets-v11',
     tileSize: 512,
-    zoomOffset: -1,
-    
+    zoomOffset: -1
 }).addTo(map);
 
 var LeafIcon = L.Icon.extend({
@@ -24,7 +21,7 @@ var LeafIcon = L.Icon.extend({
 
 var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
-    });
+});
 
 // Adds all shapefiles in countries.zip to the map
 let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
@@ -37,9 +34,18 @@ shapefile.on('click', function(e){
     });
     shapefile.bindPopup(ids.toString())
     shapefile.openPopup()
+
 })
 
-shapefile.bindPopup(L.popup().setContent())
+// Get the Excel file
+fetch("http://localhost/excel/WaterModule_ex.xlsx")
+    .then(response => response.arrayBuffer())
+    .then(buffer => {
+        const xlsx = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
+        // process data here
+        console.log(xlsx)
+    })
+    .catch(err => console.error(err));
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
@@ -180,43 +186,6 @@ map.on('draw:created', function (e) {
     // Add the new map layer to our collection of drawn items
     drawnItems.addLayer(layer);
 });
-map.on('click', function(e) {
-    marker = new L.Marker(e.latlng, {
-        contextmenu:true,
-        contextmenuItems:[{
-            text: "remove marker",
-            callback: function(){
-                pullmarker();
-            }
-        }]
-    });
-    map.addLayer(marker);
-    markers.push(marker);
-    var longMarker = markers.length;
-    var test = new Array();
-  
-    // create a red polyline from an array of LatLng points
-    if (markers.length > 1 ){
-        for(let i = 0; i < markers.length; i++) { 
-            test.push(markers[i].getLatLng());
-        }
-        var polyline = L.polyline(test, {color: 'red', clickable: 'true'}).addTo(map);
-        polylines.push(polyline);
-    }
-});
-map.on('contextmenu',(e) => {
-    L.popup()
-    .setLatLng(e.latlng)
-    .setContent('<button onclick="pullmarker()">Remove last marker</button>')
-    .addTo(map)
-    .openOn(map);
-  });
-function pullmarker(){
-    let m = markers.pop();
-    map.removeLayer(m);
-    let p = polylines.pop();
-    map.removeLayer(p);
-}
 
 // When the user right-clicks, convert data on the map to a CSV file and download it
 function onRightClick(e){
