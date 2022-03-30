@@ -39,8 +39,6 @@ shapefile.on('click', function(e){
     shapefile.openPopup()
 })
 
-// todo: Countries class
-
 // Get the Excel file
 fetch("http://localhost/excel/WaterModule_ex.xlsx")
     .then(response => response.arrayBuffer())
