@@ -28,14 +28,15 @@ let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
 shapefile.addTo(map)
 
 shapefile.on('click', function(e){
-    let ids = []
+    let info = []
     shapefile.getLayers().forEach(layer => {
-        ids.push(JSON.stringify(layer.feature.properties))
+        info.push(JSON.stringify(layer.feature.properties))
     });
-    shapefile.bindPopup(ids.toString())
+    shapefile.bindPopup(info.toString())
     shapefile.openPopup()
-
 })
+
+// todo: Countries class
 
 // Get the Excel file
 fetch("http://localhost/excel/WaterModule_ex.xlsx")
