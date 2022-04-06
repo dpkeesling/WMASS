@@ -5,6 +5,7 @@ var map = L.map('map').setView([51.505, -0.09], 13);
 var markers = new Array();
 var polylines = new Array();
 var marker;
+
 // Create a tile layer for the map images
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
@@ -12,8 +13,7 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
         'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     id: 'mapbox/streets-v11',
     tileSize: 512,
-    zoomOffset: -1,
-    
+    zoomOffset: -1
 }).addTo(map);
 
 var LeafIcon = L.Icon.extend({
@@ -24,10 +24,30 @@ var LeafIcon = L.Icon.extend({
 
 var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
-    });
+});
 
 // Adds all shapefiles in countries.zip to the map
-L.shapefile("http://localhost/shapefiles/countries.zip").addTo(map);
+let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
+shapefile.addTo(map)
+
+shapefile.on('click', function(e){
+    let info = []
+    shapefile.getLayers().forEach(layer => {
+        info.push(JSON.stringify(layer.feature.properties))
+    });
+    shapefile.bindPopup(info.toString())
+    shapefile.openPopup()
+})
+
+// Get the Excel file
+fetch("http://localhost/excel/WaterModule_ex.xlsx")
+    .then(response => response.arrayBuffer())
+    .then(buffer => {
+        const xlsx = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
+        // process data here
+        console.log(xlsx)
+    })
+    .catch(err => console.error(err));
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
