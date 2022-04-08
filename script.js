@@ -40,12 +40,21 @@ shapefile.on('click', function(e){
 })
 
 // Get the Excel file
+let xlsxFile
+let countryExcelData
+let xlsxCellData = {}
 fetch("http://localhost/excel/WaterModule_ex.xlsx")
     .then(response => response.arrayBuffer())
     .then(buffer => {
-        const xlsx = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
+        xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
+        countryExcelData = xlsxFile.Sheets.countries
+        for(var key in countryExcelData){
+            if(countryExcelData[key].w != null){
+                xlsxCellData[key] = countryExcelData[key].w
+            }
+        }
         // process data here
-        console.log(xlsx)
+        console.log(xlsxCellData)
     })
     .catch(err => console.error(err));
 
