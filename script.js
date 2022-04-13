@@ -48,9 +48,22 @@ fetch("http://localhost/excel/WaterModule_ex.xlsx")
     .then(buffer => {
         xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
         countryExcelData = xlsxFile.Sheets.countries
+        let countryHeaderRow = -1
+        let currentSection
         for(var key in countryExcelData){
             if(countryExcelData[key].w != null){
-                xlsxCellData[key] = countryExcelData[key].w
+                if(countryExcelData[key].w.charAt(0) == 'n'){
+                    countryHeaderRow = key.match(/\d+/)[0]
+                } else if (countryHeaderRow != -1){
+                    let currentKey = key.match(/\d+/)[0]
+                    if(currentKey == countryHeaderRow){
+                        currentSection = countryExcelData[key].w
+                        xlsxCellData[currentSection] = []
+                    }
+                    else if(currentKey > countryHeaderRow){
+                        xlsxCellData[currentSection].push(countryExcelData[key].w)
+                    }
+                }
             }
         }
         // process data here
