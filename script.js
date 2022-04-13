@@ -42,7 +42,7 @@ shapefile.on('click', function(e){
 // Get the Excel file
 let xlsxFile
 let countryExcelData
-let xlsxCellData = {}
+let xlsxCellData = {}   // Each entry in this object holds the text data within an individual cell
 fetch("http://localhost/excel/WaterModule_ex.xlsx")
     .then(response => response.arrayBuffer())
     .then(buffer => {
