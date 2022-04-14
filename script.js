@@ -48,23 +48,33 @@ fetch("http://localhost/excel/WaterModule_ex.xlsx")
     .then(buffer => {
         xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
         countryExcelData = xlsxFile.Sheets.countries
-        let countryHeaderRow = -1
-        let currentSection
+        let currentPosition = [0, 0]
+        let parsedRow
+        let headingRow
+        let columnHeadings = []
         for(var key in countryExcelData){
-            if(countryExcelData[key].w != null){
+            if(!key.match(/\d+/)){
+                continue
+            }
+            parsedRow = key.match(/\d+/)[0]
+            if(parsedRow > currentPosition[1]){
+                currentPosition = [1, parseInt(parsedRow)]
+            }
+            if(countryExcelData[key].w){
                 if(countryExcelData[key].w.charAt(0) == 'n'){
-                    countryHeaderRow = key.match(/\d+/)[0]
-                } else if (countryHeaderRow != -1){
-                    let currentKey = key.match(/\d+/)[0]
-                    if(currentKey == countryHeaderRow){
-                        currentSection = countryExcelData[key].w
-                        xlsxCellData[currentSection] = []
+                    headingRow = currentPosition[1]
+                }
+                if (headingRow){
+                    if(currentPosition[1] == headingRow){
+                        xlsxCellData[countryExcelData[key].w] = []
+                        columnHeadings[currentPosition[0]] = countryExcelData[key].w
                     }
-                    else if(currentKey > countryHeaderRow){
-                        xlsxCellData[currentSection].push(countryExcelData[key].w)
+                    else if(currentPosition[1] > headingRow){
+                        xlsxCellData[columnHeadings[currentPosition[0]]].push(countryExcelData[key].w)
                     }
                 }
             }
+            currentPosition[0]++
         }
         // process data here
         console.log(xlsxCellData)
