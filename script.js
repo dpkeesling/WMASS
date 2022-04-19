@@ -7,6 +7,7 @@ var polylines = new Array();
 var marker;
 
 // Create a tile layer for the map images
+// We couldn't find any way to do this other than via the Mapbox CDN
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
@@ -15,16 +16,6 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     tileSize: 512,
     zoomOffset: -1
 }).addTo(map);
-
-var LeafIcon = L.Icon.extend({
-    options: {
-         iconSize:     [38, 95]
-    }
-});
-
-var greenIcon = new LeafIcon({
-    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
-});
 
 // Adds all shapefiles in countries.zip to the map
 let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
@@ -322,10 +313,24 @@ function onRightClick(e){
     })
 }
 
+// Set properties for the hydro power plant icon
+var LeafIcon = L.Icon.extend({
+    options: {
+        // Set the size
+         iconSize:     [38, 95]
+    }
+});
+
+// This image is just a placeholder.  It can be anything
+var greenIcon = new LeafIcon({
+    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
+});
+
 let objectsJson;
 
 $(document).ready(function(){
     
+    // Read in objects.json from the local server
     $.getJSON("objects.json", function(data){
         console.log(data.HydroPowerPlant.imgPath);
 
