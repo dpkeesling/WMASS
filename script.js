@@ -268,7 +268,7 @@ $(document).ready(function(){
     // Acquire data from xlsx and shapefiles
     // use loops and if statements to determine how many of each type of object is needed, and whether we need more than one of those objects
     // Name using objectName#
-    const reservoir0 = new Reservoir(/* read data from xlsx */ "ur mom", 69, 69, 69, 69, 69, 69, 69)
+    const reservoir0 = new Reservoir(/* read data from xlsx and shapefiles */ "ur mom", 69, 69, 69, 69, 69, 69, 69)
 
     // Loop through the properties of the object and put it into a readable string
     let reservoir0PopupString = ""
@@ -279,7 +279,7 @@ $(document).ready(function(){
         }
     }    
             // Puts the marker on the map
-            let reservoir0Marker = new L.CircleMarker([51.5, -0.09], {
+            let reservoir0Marker = new L.CircleMarker([-15.38, 28.32], {
                 radius: reservoir0.radius,
                 color: reservoir0.color,
                 // Doesn't work draggable: true
