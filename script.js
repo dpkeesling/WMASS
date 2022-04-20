@@ -381,31 +381,35 @@ var greenIcon = new LeafIcon({
 
 let objectsJson;
 
+let prior_level = 13
+
 $(document).ready(function(){
-    
-    // Read in objects.json from the local server
-    $.getJSON("objects.json", function(data){
-        console.log(data.HydroPowerPlant.imgPath);
+    // Acquire data from xlsx and shapefiles
+    // use loops and if statements to determine how many of each type of object is needed, and whether we need more than one of those objects
+    // Name using objectName#
+    const reservoir0 = new Reservoir(/* read data from xlsx and shapefiles */ "ur mom", 69, 69, 69, 69, 69, 69, 69)
 
-        // Reading in JSON data from a server that represents a hydropower plant
-        objectsJson = JSON.parse(JSON.stringify(data));
+    // Loop through the properties of the object and put it into a readable string
+    let reservoir0PopupString = ""
+    let obj = reservoir0
+    for (var prop in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+            reservoir0PopupString += prop + ": " + obj[prop] + "\n"
+        }
+    }    
+            // Puts the marker on the map
+            let reservoir0Marker = new L.CircleMarker([-15.38, 28.32], {
+                radius: reservoir0.radius,
+                color: reservoir0.color,
+                // Doesn't work draggable: true
+            }).addTo(map)
+                .bindPopup(reservoir0PopupString).openPopup()
 
-        var powerPlantIcon = L.icon({
-            iconUrl: objectsJson.HydroPowerPlant.imgPath,
-        
-            iconSize:     objectsJson.HydroPowerPlant.iconSize, // size of the icon
-            iconAnchor:   objectsJson.HydroPowerPlant.iconAnchor, // point of the icon which will correspond to marker's location
-            popupAnchor:  objectsJson.HydroPowerPlant.popupAnchor // point from which the popup should open relative to the iconAnchor
-        });
-
-        // The marker that represents the power plant from the JSON data
-        L.marker([51.5, -0.09], {
-            draggable: true,
-            icon: powerPlantIcon
-        }).addTo(map)
-            .bindPopup("I am a dam that produces " + objectsJson.HydroPowerPlant.powerProduction + " in electricity").openPopup();
-
-    }).fail(function(){
-        console.log("An error has occurred.");
-    });
+                // TODO: Improve zoom scaling
+                map.on('zoomend', function() {
+                    var currentZoom = map.getZoom();
+                    console.log(currentZoom)
+                    (prior_level > currentZoom) ? (reservoir0.radius /= 2) : (reservoir0.radius *= 2)
+                    myMarker.setRadius(reservoir0.radius)
+                  });
 });

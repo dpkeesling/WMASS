@@ -1,9 +1,0 @@
-{
-    "HydroPowerPlant":{
-        "imgPath":"./icons/hydroElectricPP.png",
-        "iconSize": [96, 96],
-        "iconAnchor": [48, 48],
-        "popupAnchor": [0, -30],
-        "powerProduction":"0.85 dollars/kwh"
-    }
-}
