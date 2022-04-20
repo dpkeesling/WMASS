@@ -28,9 +28,9 @@ var greenIcon = new LeafIcon({
 
 // Load all of the Shapefile and Excel data.
 async function loadShapefilesAndExcelFiles(){
-    // Adds all shapefiles in catchments.zip to the map
+    // Adds all shapefiles in countries.zip to the map
     // Todo: prompt the user for this zip file instead of hardcoding
-    let shapefile = L.shapefile("http://localhost/shapefiles/catchments.zip")
+    let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
     shapefile.addTo(map)
 
     // Open the info popup when the shapefile is clicked
@@ -58,7 +58,7 @@ async function loadShapefilesAndExcelFiles(){
         .then(buffer => {
             xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
             // This is where we can specify which XLSX sheet we are grabbing
-            countryExcelData = xlsxFile.Sheets.Catchments
+            countryExcelData = xlsxFile.Sheets.countries
             let currentPosition = [0, 0]    // Current position in Excel file (column, row)
             let parsedRow   // Parsed row number
             let headingRow  // Stores the number of the row that contains the column headings.  We are assuming that this is constant
@@ -98,10 +98,10 @@ async function loadShapefilesAndExcelFiles(){
             }
 
             // Loop through all of our shapefile/excel data and join them together for each country
-            for(var i = 0; i < xlsxCellData.ncatch.length; i++){
+            for(var i = 0; i < xlsxCellData.ncountry.length; i++){
                 shapefile.getLayers().forEach(shapefileLayer => {
                     let curJson = shapefileLayer.feature.properties
-                    if(curJson.ncatch == xlsxCellData.ncatch[i]){
+                    if(curJson.ncountry == xlsxCellData.ncountry[i]){
                         for(const [key, value] of Object.entries(xlsxCellData)){
                             curJson[key] = value[i]
                         }
@@ -118,8 +118,8 @@ async function loadShapefilesAndExcelFiles(){
 loadShapefilesAndExcelFiles().then(function(results){
     // This stores all of the country data.  It is a combination of the shapefile and Excel file data.
     // Any processing should be done here.
-    let catchmentData = results
-    console.log(catchmentData)
+    let countryData = results
+    console.log(countryData)
     // ...
 })
 
