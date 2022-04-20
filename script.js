@@ -262,6 +262,8 @@ function onRightClick(e){
 
 let objectsJson;
 
+let prior_level = 13
+
 $(document).ready(function(){
     // Acquire data from xlsx and shapefiles
     // use loops and if statements to determine how many of each type of object is needed, and whether we need more than one of those objects
@@ -280,12 +282,15 @@ $(document).ready(function(){
             let reservoir0Marker = new L.CircleMarker([51.5, -0.09], {
                 radius: reservoir0.radius,
                 color: reservoir0.color,
-                draggable: true
+                // Doesn't work draggable: true
             }).addTo(map)
                 .bindPopup(reservoir0PopupString).openPopup()
 
+                // TODO: Improve zoom scaling
                 map.on('zoomend', function() {
                     var currentZoom = map.getZoom();
-                    myMarker.setRadius(currentZoom);
+                    console.log(currentZoom)
+                    (prior_level > currentZoom) ? (reservoir0.radius /= 2) : (reservoir0.radius *= 2)
+                    myMarker.setRadius(reservoir0.radius)
                   });
 });
