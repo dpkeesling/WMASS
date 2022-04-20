@@ -18,9 +18,11 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 }).addTo(map);
 
 // Adds all shapefiles in countries.zip to the map
+// Todo: prompt the user for this zip file instead of hardcoding
 let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
 shapefile.addTo(map)
 
+// Open the info popup when the shapefile is clicked
 shapefile.on('click', function(e){
     let info = []
     shapefile.getLayers().forEach(layer => {
@@ -34,6 +36,7 @@ shapefile.on('click', function(e){
 let xlsxFile
 let countryExcelData
 let xlsxCellData = {}   // JSON object where each key is the column name and each value is an array of row values
+// Todo: Prompt the user for this instead of hardcoding it
 fetch("http://localhost/excel/WaterModule_ex.xlsx")
     .then(response => response.arrayBuffer())
     .then(buffer => {
@@ -82,9 +85,11 @@ fetch("http://localhost/excel/WaterModule_ex.xlsx")
     })
     .catch(err => console.error(err));
 
+// Create a FeatureGroup for any items the user draws
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
+// Specifications for the toolbox at the right of the screen and what each option draws
 var drawControl = new L.Control.Draw({
     position: 'topright',
     draw: {
@@ -165,6 +170,7 @@ class MapObject {
  * @returns the new MapObject
  */
 function createHydroPowerPlant(layer) {
+    // Create all the HTML for the popup
     let hydroPowerPlantId = Object.keys(jsonMapData.circle.hydroPowerPlants).length
     let waterAllocSpanId = "waterAllocSpan" + hydroPowerPlantId
     let waterAllocSliderId = "waterAllocSlider" + hydroPowerPlantId
@@ -199,6 +205,7 @@ function createHydroPowerPlant(layer) {
     }
     popupHtml.appendChild(waterAllocSlider)
 
+    // Create a new MapObject and add it to our feature layer
     let newObject = new MapObject(hydroPowerPlantId, popupHtml.textContent, null)
     jsonMapData.circle.hydroPowerPlants[hydroPowerPlantId] = JSON.stringify(newObject)
 
@@ -207,6 +214,7 @@ function createHydroPowerPlant(layer) {
     return newObject
 }
 
+// Handle what happens when the user draws a shape on the map
 map.on('draw:created', function (e) {
     var type = e.layerType,
         layer = e.layer;
@@ -215,6 +223,7 @@ map.on('draw:created', function (e) {
         layer.bindPopup('A popup!');
     }
     else if (type === 'circle') {
+        // Circles represent hydro power plants for now
         createHydroPowerPlant(layer)
     }
 
@@ -222,6 +231,7 @@ map.on('draw:created', function (e) {
     drawnItems.addLayer(layer);
 });
 map.on('click', function(e) {
+    // Create a marker when the user clicks on the map
     marker = new L.Marker(e.latlng, {
         contextmenu:true,
         contextmenuItems:[{
@@ -245,6 +255,8 @@ map.on('click', function(e) {
         polylines.push(polyline);
     }
 });
+
+// Add option for user to remove a marker from the map
 map.on('contextmenu',(e) => {
     L.popup()
     .setLatLng(e.latlng)
@@ -260,12 +272,12 @@ function pullmarker(){
 }
 
 // When the user right-clicks, convert data on the map to a CSV file and download it
+// Todo: this currently only converts the markers on the map to CSV data.
 function onRightClick(e){
 
     var coord=e.latlng.toString().split(',');
     var lat=coord[0].split('(');
     var long=coord[1].split(')');
-    //alert("you clicked the map at LAT: "+ lat[1]+" and LONG:"+long[0])
     const marker = L.marker([lat[1], long[0]], {
         draggable: false,
     });
@@ -291,6 +303,7 @@ function onRightClick(e){
         }
     });
 
+    // Create and format the CSV
     var json = collection.features
     var fields = Object.keys(json[0])
     var replacer = function(key, value) { return value === null ? '' : value } 
@@ -308,7 +321,7 @@ function onRightClick(e){
         var hiddenElement = document.createElement('a');
         hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
         hiddenElement.target = '_blank';
-        hiddenElement.download = 'people.csv';
+        hiddenElement.download = 'data.csv';
         hiddenElement.click();
     })
 }
