@@ -273,6 +273,7 @@ function pullmarker(){
 
 // When the user right-clicks, convert data on the map to a CSV file and download it
 // Todo: this currently only converts the markers on the map to CSV data.
+// This is currently unused, but the code might be useful for the future.
 function onRightClick(e){
 
     var coord=e.latlng.toString().split(',');
