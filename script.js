@@ -7,6 +7,7 @@ var polylines = new Array();
 var marker;
 
 // Create a tile layer for the map images
+// We couldn't find any way to do this other than via the Mapbox CDN
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
@@ -26,32 +27,108 @@ var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
 });
 
-// Adds all shapefiles in countries.zip to the map
-let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
-shapefile.addTo(map)
+// Load all of the Shapefile and Excel data.
+async function loadShapefilesAndExcelFiles(){
+    // Adds all shapefiles in countries.zip to the map
+    // Todo: prompt the user for this zip file instead of hardcoding
+    let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
+    shapefile.addTo(map)
 
-shapefile.on('click', function(e){
-    let info = []
-    shapefile.getLayers().forEach(layer => {
-        info.push(JSON.stringify(layer.feature.properties))
-    });
-    shapefile.bindPopup(info.toString())
-    shapefile.openPopup()
+    // Open the info popup when the shapefile is clicked
+    shapefile.on('click', function(e){
+        let info = []
+        shapefile.getLayers().forEach(layer => {
+            info.push(JSON.stringify(layer.feature.properties))
+        });
+        shapefile.bindPopup(info.toString())
+        shapefile.openPopup()
+    })
+
+    // Since we join the Excel data to the shapefile data, we need to ensure the shapefile data is loaded before we can continue.
+    while(shapefile.getLayers().length == 0){
+        await new Promise(r => setTimeout(r, 1000));
+    }
+
+    // Get the Excel file
+    let xlsxFile
+    let countryExcelData
+    let combinedCountryData = [] // Country data (excel + shapefile)
+    let xlsxCellData = {}   // JSON object where each key is the column name and each value is an array of row values
+    fetch("http://localhost/excel/WaterModule_ex.xlsx")
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+            xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
+            // This is where we can specify which XLSX sheet we are grabbing
+            countryExcelData = xlsxFile.Sheets.countries
+            let currentPosition = [0, 0]    // Current position in Excel file (column, row)
+            let parsedRow   // Parsed row number
+            let headingRow  // Stores the number of the row that contains the column headings.  We are assuming that this is constant
+            let columnHeadings = []     // String array of each of the column headings
+            for(var key in countryExcelData){
+                if(!key.match(/\d+/)){
+                    // If the key from the Excel document does not contain an integer, skip this iteration
+                    continue
+                }
+                parsedRow = key.match(/\d+/)[0]     // Grab the integer from the current row/column; this will be the row (e.g. A10 -> 10)
+                if(parsedRow > currentPosition[1]){
+                    // If we moved to the next row, set our position as such
+                    currentPosition = [1, parseInt(parsedRow)]
+                }
+                if(countryExcelData[key].w){
+                    if(countryExcelData[key].w.charAt(0) == 'n'){
+                        // Todo: This is a BIG assumption.  We are assuming that the first column heading begins with a lowercase 'n'.
+                        // This is how we are determining which row contains the column headings.  This seems like a safe assumption for now,
+                        // but it certainly does not seem to be a futureproof solution.
+                        headingRow = currentPosition[1]
+                    }
+                    if (headingRow){
+                        if(currentPosition[1] == headingRow){
+                            // If we found the heading row and we are currently navigating through the heading row, record each column heading.
+                            xlsxCellData[countryExcelData[key].w] = []
+                            columnHeadings[currentPosition[0]] = countryExcelData[key].w
+                        }
+                        else if(currentPosition[1] > headingRow){
+                            // If we have surpassed the row number that contains the column headings, then we know we are dealing with legit
+                            // data that we need to record.
+                            xlsxCellData[columnHeadings[currentPosition[0]]].push(countryExcelData[key].w)
+                        }
+                    }
+                }
+                // Increment the column position
+                currentPosition[0]++
+            }
+
+            // Loop through all of our shapefile/excel data and join them together for each country
+            for(var i = 0; i < xlsxCellData.ncountry.length; i++){
+                shapefile.getLayers().forEach(shapefileLayer => {
+                    let curJson = shapefileLayer.feature.properties
+                    if(curJson.ncountry == xlsxCellData.ncountry[i]){
+                        for(const [key, value] of Object.entries(xlsxCellData)){
+                            curJson[key] = value[i]
+                        }
+                        // Push the current JSON onto the combined array
+                        combinedCountryData.push(curJson)
+                    }
+                });
+            }
+        })
+        .catch(err => console.error(err));
+    
+    return combinedCountryData
+}
+loadShapefilesAndExcelFiles().then(function(results){
+    // This stores all of the country data.  It is a combination of the shapefile and Excel file data.
+    // Any processing should be done here.
+    let countryData = results
+    console.log(countryData)
+    // ...
 })
 
-// Get the Excel file
-fetch("http://localhost/excel/WaterModule_ex.xlsx")
-    .then(response => response.arrayBuffer())
-    .then(buffer => {
-        const xlsx = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
-        // process data here
-        console.log(xlsx)
-    })
-    .catch(err => console.error(err));
-
+// Create a FeatureGroup for any items the user draws
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
+// Specifications for the toolbox at the right of the screen and what each option draws
 var drawControl = new L.Control.Draw({
     position: 'topright',
     draw: {
@@ -132,6 +209,7 @@ class MapObject {
  * @returns the new MapObject
  */
 function createHydroPowerPlant(layer) {
+    // Create all the HTML for the popup
     let hydroPowerPlantId = Object.keys(jsonMapData.circle.hydroPowerPlants).length
     let waterAllocSpanId = "waterAllocSpan" + hydroPowerPlantId
     let waterAllocSliderId = "waterAllocSlider" + hydroPowerPlantId
@@ -166,6 +244,7 @@ function createHydroPowerPlant(layer) {
     }
     popupHtml.appendChild(waterAllocSlider)
 
+    // Create a new MapObject and add it to our feature layer
     let newObject = new MapObject(hydroPowerPlantId, popupHtml.textContent, null)
     jsonMapData.circle.hydroPowerPlants[hydroPowerPlantId] = JSON.stringify(newObject)
 
@@ -174,6 +253,7 @@ function createHydroPowerPlant(layer) {
     return newObject
 }
 
+// Handle what happens when the user draws a shape on the map
 map.on('draw:created', function (e) {
     var type = e.layerType,
         layer = e.layer;
@@ -182,6 +262,7 @@ map.on('draw:created', function (e) {
         layer.bindPopup('A popup!');
     }
     else if (type === 'circle') {
+        // Circles represent hydro power plants for now
         createHydroPowerPlant(layer)
     }
 
@@ -189,6 +270,7 @@ map.on('draw:created', function (e) {
     drawnItems.addLayer(layer);
 });
 map.on('click', function(e) {
+    // Create a marker when the user clicks on the map
     marker = new L.Marker(e.latlng, {
         contextmenu:true,
         contextmenuItems:[{
@@ -212,6 +294,8 @@ map.on('click', function(e) {
         polylines.push(polyline);
     }
 });
+
+// Add option for user to remove a marker from the map
 map.on('contextmenu',(e) => {
     L.popup()
     .setLatLng(e.latlng)
@@ -227,12 +311,13 @@ function pullmarker(){
 }
 
 // When the user right-clicks, convert data on the map to a CSV file and download it
+// Todo: this currently only converts the markers on the map to CSV data.
+// This is currently unused, but the code might be useful for the future.
 function onRightClick(e){
 
     var coord=e.latlng.toString().split(',');
     var lat=coord[0].split('(');
     var long=coord[1].split(')');
-    //alert("you clicked the map at LAT: "+ lat[1]+" and LONG:"+long[0])
     const marker = L.marker([lat[1], long[0]], {
         draggable: false,
     });
@@ -258,6 +343,7 @@ function onRightClick(e){
         }
     });
 
+    // Create and format the CSV
     var json = collection.features
     var fields = Object.keys(json[0])
     var replacer = function(key, value) { return value === null ? '' : value } 
@@ -275,15 +361,29 @@ function onRightClick(e){
         var hiddenElement = document.createElement('a');
         hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
         hiddenElement.target = '_blank';
-        hiddenElement.download = 'people.csv';
+        hiddenElement.download = 'data.csv';
         hiddenElement.click();
     })
 }
+
+// Set properties for the hydro power plant icon
+var LeafIcon = L.Icon.extend({
+    options: {
+        // Set the size
+         iconSize:     [38, 95]
+    }
+});
+
+// This image is just a placeholder.  It can be anything
+var greenIcon = new LeafIcon({
+    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
+});
 
 let objectsJson;
 
 $(document).ready(function(){
     
+    // Read in objects.json from the local server
     $.getJSON("objects.json", function(data){
         console.log(data.HydroPowerPlant.imgPath);
 
