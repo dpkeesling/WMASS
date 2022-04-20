@@ -17,7 +17,6 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     zoomOffset: -1
 }).addTo(map);
 
-<<<<<<< HEAD
 var LeafIcon = L.Icon.extend({
     options: {
          iconSize:     [38, 95]
@@ -74,54 +73,6 @@ async function loadShapefilesAndExcelFiles(){
                 if(parsedRow > currentPosition[1]){
                     // If we moved to the next row, set our position as such
                     currentPosition = [1, parseInt(parsedRow)]
-=======
-// Adds all shapefiles in countries.zip to the map
-// Todo: prompt the user for this zip file instead of hardcoding
-let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
-shapefile.addTo(map)
-
-// Open the info popup when the shapefile is clicked
-shapefile.on('click', function(e){
-    let info = []
-    shapefile.getLayers().forEach(layer => {
-        info.push(JSON.stringify(layer.feature.properties))
-    });
-    shapefile.bindPopup(info.toString())
-    shapefile.openPopup()
-})
-
-// Get the Excel file
-let xlsxFile
-let countryExcelData
-let xlsxCellData = {}   // JSON object where each key is the column name and each value is an array of row values
-// Todo: Prompt the user for this instead of hardcoding it
-fetch("http://localhost/excel/WaterModule_ex.xlsx")
-    .then(response => response.arrayBuffer())
-    .then(buffer => {
-        xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
-        // This is where we can specify which XLSX sheet we are grabbing
-        countryExcelData = xlsxFile.Sheets.countries
-        let currentPosition = [0, 0]    // Current position in Excel file (column, row)
-        let parsedRow   // Parsed row number
-        let headingRow  // Stores the number of the row that contains the column headings.  We are assuming that this is constant
-        let columnHeadings = []     // String array of each of the column headings
-        for(var key in countryExcelData){
-            if(!key.match(/\d+/)){
-                // If the key from the Excel document does not contain an integer, skip this iteration
-                continue
-            }
-            parsedRow = key.match(/\d+/)[0]     // Grab the integer from the current row/column; this will be the row (e.g. A10 -> 10)
-            if(parsedRow > currentPosition[1]){
-                // If we moved to the next row, set our position as such
-                currentPosition = [1, parseInt(parsedRow)]
-            }
-            if(countryExcelData[key].w){
-                if(countryExcelData[key].w.charAt(0) == 'n'){
-                    // Todo: This is a BIG assumption.  We are assuming that the first column heading begins with a lowercase 'n'.
-                    // This is how we are determining which row contains the column headings.  This seems like a safe assumption for now,
-                    // but it certainly does not seem to be a futureproof solution.
-                    headingRow = currentPosition[1]
->>>>>>> master
                 }
                 if(countryExcelData[key].w){
                     if(countryExcelData[key].w.charAt(0) == 'n'){
