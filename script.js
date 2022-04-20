@@ -26,70 +26,102 @@ var greenIcon = new LeafIcon({
     iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/Information_icon4_orange.svg'
 });
 
-// Adds all shapefiles in countries.zip to the map
-let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
-shapefile.addTo(map)
+// Load all of the Shapefile and Excel data.
+async function loadShapefilesAndExcelFiles(){
+    // Adds all shapefiles in countries.zip to the map
+    // Todo: prompt the user for this zip file instead of hardcoding
+    let shapefile = L.shapefile("http://localhost/shapefiles/countries.zip")
+    shapefile.addTo(map)
 
-shapefile.on('click', function(e){
-    let info = []
-    shapefile.getLayers().forEach(layer => {
-        info.push(JSON.stringify(layer.feature.properties))
-    });
-    shapefile.bindPopup(info.toString())
-    shapefile.openPopup()
-})
-
-// Get the Excel file
-let xlsxFile
-let countryExcelData
-let xlsxCellData = {}   // JSON object where each key is the column name and each value is an array of row values
-fetch("http://localhost/excel/WaterModule_ex.xlsx")
-    .then(response => response.arrayBuffer())
-    .then(buffer => {
-        xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
-        // This is where we can specify which XLSX sheet we are grabbing
-        countryExcelData = xlsxFile.Sheets.countries
-        let currentPosition = [0, 0]    // Current position in Excel file (column, row)
-        let parsedRow   // Parsed row number
-        let headingRow  // Stores the number of the row that contains the column headings.  We are assuming that this is constant
-        let columnHeadings = []     // String array of each of the column headings
-        for(var key in countryExcelData){
-            if(!key.match(/\d+/)){
-                // If the key from the Excel document does not contain an integer, skip this iteration
-                continue
-            }
-            parsedRow = key.match(/\d+/)[0]     // Grab the integer from the current row/column; this will be the row (e.g. A10 -> 10)
-            if(parsedRow > currentPosition[1]){
-                // If we moved to the next row, set our position as such
-                currentPosition = [1, parseInt(parsedRow)]
-            }
-            if(countryExcelData[key].w){
-                if(countryExcelData[key].w.charAt(0) == 'n'){
-                    // Todo: This is a BIG assumption.  We are assuming that the first column heading begins with a lowercase 'n'.
-                    // This is how we are determining which row contains the column headings.  This seems like a safe assumption for now,
-                    // but it certainly does not seem to be a futureproof solution.
-                    headingRow = currentPosition[1]
-                }
-                if (headingRow){
-                    if(currentPosition[1] == headingRow){
-                        // If we found the heading row and we are currently navigating through the heading row, record each column heading.
-                        xlsxCellData[countryExcelData[key].w] = []
-                        columnHeadings[currentPosition[0]] = countryExcelData[key].w
-                    }
-                    else if(currentPosition[1] > headingRow){
-                        // If we have surpassed the row number that contains the column headings, then we know we are dealing with legit
-                        // data that we need to record.
-                        xlsxCellData[columnHeadings[currentPosition[0]]].push(countryExcelData[key].w)
-                    }
-                }
-            }
-            // Increment the column position
-            currentPosition[0]++
-        }
-        // process data here
-        console.log(xlsxCellData)
+    // Open the info popup when the shapefile is clicked
+    shapefile.on('click', function(e){
+        let info = []
+        shapefile.getLayers().forEach(layer => {
+            info.push(JSON.stringify(layer.feature.properties))
+        });
+        shapefile.bindPopup(info.toString())
+        shapefile.openPopup()
     })
-    .catch(err => console.error(err));
+
+    // Since we join the Excel data to the shapefile data, we need to ensure the shapefile data is loaded before we can continue.
+    while(shapefile.getLayers().length == 0){
+        await new Promise(r => setTimeout(r, 1000));
+    }
+
+    // Get the Excel file
+    let xlsxFile
+    let countryExcelData
+    let combinedCountryData = [] // Country data (excel + shapefile)
+    let xlsxCellData = {}   // JSON object where each key is the column name and each value is an array of row values
+    fetch("http://localhost/excel/WaterModule_ex.xlsx")
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+            xlsxFile = XLSX.read(new Uint8Array(buffer, {type: 'array'}));
+            // This is where we can specify which XLSX sheet we are grabbing
+            countryExcelData = xlsxFile.Sheets.countries
+            let currentPosition = [0, 0]    // Current position in Excel file (column, row)
+            let parsedRow   // Parsed row number
+            let headingRow  // Stores the number of the row that contains the column headings.  We are assuming that this is constant
+            let columnHeadings = []     // String array of each of the column headings
+            for(var key in countryExcelData){
+                if(!key.match(/\d+/)){
+                    // If the key from the Excel document does not contain an integer, skip this iteration
+                    continue
+                }
+                parsedRow = key.match(/\d+/)[0]     // Grab the integer from the current row/column; this will be the row (e.g. A10 -> 10)
+                if(parsedRow > currentPosition[1]){
+                    // If we moved to the next row, set our position as such
+                    currentPosition = [1, parseInt(parsedRow)]
+                }
+                if(countryExcelData[key].w){
+                    if(countryExcelData[key].w.charAt(0) == 'n'){
+                        // Todo: This is a BIG assumption.  We are assuming that the first column heading begins with a lowercase 'n'.
+                        // This is how we are determining which row contains the column headings.  This seems like a safe assumption for now,
+                        // but it certainly does not seem to be a futureproof solution.
+                        headingRow = currentPosition[1]
+                    }
+                    if (headingRow){
+                        if(currentPosition[1] == headingRow){
+                            // If we found the heading row and we are currently navigating through the heading row, record each column heading.
+                            xlsxCellData[countryExcelData[key].w] = []
+                            columnHeadings[currentPosition[0]] = countryExcelData[key].w
+                        }
+                        else if(currentPosition[1] > headingRow){
+                            // If we have surpassed the row number that contains the column headings, then we know we are dealing with legit
+                            // data that we need to record.
+                            xlsxCellData[columnHeadings[currentPosition[0]]].push(countryExcelData[key].w)
+                        }
+                    }
+                }
+                // Increment the column position
+                currentPosition[0]++
+            }
+
+            // Loop through all of our shapefile/excel data and join them together for each country
+            for(var i = 0; i < xlsxCellData.ncountry.length; i++){
+                shapefile.getLayers().forEach(shapefileLayer => {
+                    let curJson = shapefileLayer.feature.properties
+                    if(curJson.ncountry == xlsxCellData.ncountry[i]){
+                        for(const [key, value] of Object.entries(xlsxCellData)){
+                            curJson[key] = value[i]
+                        }
+                        // Push the current JSON onto the combined array
+                        combinedCountryData.push(curJson)
+                    }
+                });
+            }
+        })
+        .catch(err => console.error(err));
+    
+    return combinedCountryData
+}
+loadShapefilesAndExcelFiles().then(function(results){
+    // This stores all of the country data.  It is a combination of the shapefile and Excel file data.
+    // Any processing should be done here.
+    let countryData = results
+    console.log(countryData)
+    // ...
+})
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
