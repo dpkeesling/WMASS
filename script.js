@@ -387,7 +387,7 @@ $(document).ready(function(){
     // Acquire data from xlsx and shapefiles
     // use loops and if statements to determine how many of each type of object is needed, and whether we need more than one of those objects
     // Name using objectName#
-    const reservoir0 = new Reservoir(/* read data from xlsx and shapefiles */ "ur mom", 69, 69, 69, 69, 69, 69, 69)
+    const reservoir0 = new Reservoir(/* read data from xlsx and shapefiles */ "waterMcRainPlace", 1, 2, 3, 4, 5, 6, 7)
 
     // Loop through the properties of the object and put it into a readable string
     let reservoir0PopupString = ""
