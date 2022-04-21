@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Leaflet Demo</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./leaflet/leaflet.css" />
+    <script src="./leaflet/leaflet.js"></script>
+	<link rel="stylesheet" href="./leaflet-draw/leafletDraw/dist/leaflet.draw.css"/>
+	<script src="./leaflet-draw/leafletDraw/dist/leaflet.draw.js"> </script>
+	<script lang="javascript" src="./excel/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div id="map" style="width: 1200px; height: 800px; position: relative; outline: none;" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0">
+	<div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);">
+		<div class="leaflet-pane leaflet-shadow-pane">
+			<img src="./leaflet/images/marker-shadow.png" class="leaflet-marker-shadow leaflet-zoom-animated" alt="" style="margin-left: -12px; margin-top: -41px; width: 41px; height: 41px; transform: translate3d(300px, 247px, 0px);">
+		</div>
+		<div class="leaflet-pane leaflet-overlay-pane">
+			<svg pointer-events="none" class="leaflet-zoom-animated" width="720" height="480" viewBox="-60 -40 720 480" style="transform: translate3d(-60px, -40px, 0px);">
+				<g>
+					<path class="leaflet-interactive" stroke="red" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#f03" fill-opacity="0.5" fill-rule="evenodd" d="M141.20355555554852,171.94704600190744a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0 "></path>
+					<path class="leaflet-interactive" stroke="#3388ff" stroke-opacity="1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="#3388ff" fill-opacity="0.2" fill-rule="evenodd" d="M358 163L474 219L550 153z"></path>
+				</g>
+			</svg>
+		</div>
+		<div class="leaflet-pane leaflet-marker-pane">
+			<img src="./leaflet/images/marker-icon-2x.png"  contextmenu="pullmarker()" class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" alt="" tabindex="0" style="margin-left: -12px; margin-top: -41px; width: 25px; height: 41px; transform: translate3d(300px, 247px, 0px); z-index: 247;">
+		</div>
+		<div class="leaflet-pane leaflet-tooltip-pane">
+
+		</div>
+		<div class="leaflet-pane leaflet-popup-pane">
+			<div class="leaflet-popup  leaflet-zoom-animated" style="opacity: 1; transform: translate3d(301px, 213px, 0px); bottom: -7px; left: -58px;">
+				<div class="leaflet-popup-content-wrapper">
+					<div class="leaflet-popup-content" style="width: 75px;">
+						<b>Hello world!</b>
+						<br>
+						I am a popup.
+					</div>
+				</div>
+				<div class="leaflet-popup-tip-container">
+					<div class="leaflet-popup-tip">
+
+					</div>
+				</div>
+				<a class="leaflet-popup-close-button" >×</a>
+			</div>
+		</div>
+		<div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(1.04805e+06px, 697379px, 0px) scale(4096);">
+		</div>
+	</div>
+	<div class="leaflet-control-container">
+		<div class="leaflet-top leaflet-left">
+			<div class="leaflet-control-zoom leaflet-bar leaflet-control">
+				<a class="leaflet-control-zoom-in" title="Zoom in" role="button" aria-label="Zoom in">+</a>
+				<a class="leaflet-control-zoom-out" title="Zoom out" role="button" aria-label="Zoom out">−</a>
+			</div>
+		</div>
+		<div class="leaflet-top leaflet-right">
+
+		</div>
+		<div class="leaflet-bottom leaflet-left">
+
+		</div>
+		<div class="leaflet-bottom leaflet-right">
+			<div class="leaflet-control-attribution leaflet-control">
+			</div>
+		</div>
+	</div>
+</div>
+<script src="./jquery-3.6.0.min.js"></script>
+<script src="./leaflet.shapefile/shp.min.js"></script>
+<script src="./leaflet.shapefile/leaflet.shpfile.js"></script>
+<script src="./objects.js"></script>
+<script src="./script.js"></script>
+
+</body></html>
